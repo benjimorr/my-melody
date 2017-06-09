@@ -30,6 +30,22 @@ var albumMarconi = {
     ]
 };
 
+// My own album Object
+var albumMorrison = {
+    title: 'My Life',
+    artist: 'Ben Morrison',
+    label: 'Spinnin Records',
+    year: '2016',
+    albumArtUrl: 'assets/images/album_covers/05.png',
+    songs: [
+        {title: 'The Beginning', duration: '4:35'},
+        {title: 'Finding My Place', duration: '2:24'},
+        {title: 'Party Till the Morning', duration: '3:31'},
+        {title: 'Later Years', duration: '4:03'},
+        {title: 'Outro', duration: '1:05'}
+    ]
+};
+
 // Function to create an album song row
 var createSongRow = function(songNumber, songName, songLength) {
     var template =
@@ -64,4 +80,16 @@ var setCurrentAlbum = function(album) {
 
 window.onload = function() {
     setCurrentAlbum(albumPicasso);
+    var albums = [albumPicasso, albumMarconi, albumMorrison];
+    var count = 1;
+
+    var albumImage = document.getElementsByClassName('album-cover-art')[0];
+    albumImage.addEventListener('click', function(event) {
+        setCurrentAlbum(albums[count]);
+        if(count == albums.length - 1) {
+            count = 0;
+        } else {
+            count++;
+        }
+    });
 };
