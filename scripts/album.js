@@ -50,7 +50,7 @@ var albumMorrison = {
 var createSongRow = function(songNumber, songName, songLength) {
     var template =
         '<tr class="album-view-song-item">'
-    +   '   <td class="song-item-number">' + songNumber + '</td>'
+    +   '   <td class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</td>'
     +   '   <td class="song-item-title">' + songName + '</td>'
     +   '   <td class="song-item-duration">' + songLength + '</td>'
     +   '</tr>';
@@ -78,6 +78,13 @@ var setCurrentAlbum = function(album) {
     }
 };
 
+// Elements that have listeners added to them
+var songListContainer = document.getElementsByClassName('album-view-song-list')[0];
+var songRows = document.getElementsByClassName('album-view-song-item');
+
+// Album button templates
+var playButtomTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
+
 window.onload = function() {
     setCurrentAlbum(albumPicasso);
     var albums = [albumPicasso, albumMarconi, albumMorrison];
@@ -92,4 +99,19 @@ window.onload = function() {
             count++;
         }
     });
+
+    songListContainer.addEventListener('mouseover', function(event) {
+        // Only target individual song rows during event delegation
+        if(event.target.parentElement.className === 'album-view-song-item') {
+            // Change the content from the number to the play button's HTML
+            event.target.parentElement.querySelector('.song-item-number').innerHTML = playButtomTemplate;
+        }
+    });
+
+    for(var i = 0; i < songRows.length; i++) {
+        songRows[i].addEventListener('mouseleave', function(event) {
+            // Revert content back to the number; selects first child element, which is the song-item-number element
+            this.children[0].innerHTML = this.children[0].getAttribute('data-song-number');
+        });
+    }
 };
