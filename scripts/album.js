@@ -143,18 +143,6 @@ var currentlyPlayingSong = null;
 
 window.onload = function() {
     setCurrentAlbum(albumPicasso);
-    var albums = [albumPicasso, albumMarconi, albumMorrison];
-    var count = 1;
-
-    var albumImage = document.getElementsByClassName('album-cover-art')[0];
-    albumImage.addEventListener('click', function(event) {
-        setCurrentAlbum(albums[count]);
-        if(count == albums.length - 1) {
-            count = 0;
-        } else {
-            count++;
-        }
-    });
 
     songListContainer.addEventListener('mouseover', function(event) {
         if(event.target.parentElement.className === 'album-view-song-item') {
