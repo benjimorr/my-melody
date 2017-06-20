@@ -1,6 +1,6 @@
 // Checkpoint 16 jQuery refactoring
 var animatePoints = function() {
-    // Located in utilities.js file:
+
     var revealPoint = function() {
         $(this).css({
             opacity: 1,
