@@ -104,34 +104,22 @@ var updatePlayerBarSong = function() {
     $('.main-controls .play-pause').html(playerBarPauseButton);
 };
 
-// Functions to control the song change functionality when the next and prev buttons are pressed
-var nextSong = function() {
+// Extra credit: combining nextSong and previousSong into one function
+var changeSong = function() {
     var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-    currentSongIndex++;
-
-    if(currentSongIndex >= currentAlbum.songs.length) {
-        currentSongIndex = 0;
-    }
-
-    // Save last song number before changing it
-    var lastSongNumber = currentlyPlayingSongNumber;
-
-    // Set new current song
-    setSong(currentSongIndex + 1);
-
-    // Update player bar info
-    updatePlayerBarSong();
-
-    getSongNumberCell(lastSongNumber).html(lastSongNumber);
-    getSongNumberCell(currentlyPlayingSongNumber).html(pauseButtonTemplate);
-};
-
-var previousSong = function() {
-    var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-    currentSongIndex--;
-
-    if(currentSongIndex < 0) {
-        currentSongIndex = currentAlbum.songs.length - 1;
+    switch(this.className) {
+        case 'previous':
+            currentSongIndex--;
+            if(currentSongIndex < 0) {
+                currentSongIndex = currentAlbum.songs.length - 1;
+            }
+            break;
+        case 'next':
+            currentSongIndex++;
+            if(currentSongIndex >= currentAlbum.songs.length) {
+                currentSongIndex = 0;
+            }
+            break;
     }
 
     // Save last song number before changing it
@@ -164,6 +152,6 @@ var $nextButton = $('.main-controls .next');
 
 $(document).ready(function() {
     setCurrentAlbum(albumPicasso);
-    $previousButton.click(previousSong);
-    $nextButton.click(nextSong);
+    $previousButton.click(changeSong);
+    $nextButton.click(changeSong);
 });
