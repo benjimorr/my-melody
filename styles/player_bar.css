@@ -36,8 +36,10 @@
     margin-right: 16.5%;
 }
 .player-bar .main-controls .play-pause {
+    display: inline-block;
     margin-right: 15%;
     font-size: 1.6rem;
+    min-width: 20px;
 }
 .player-bar .currently-playing {
     width: 50%;
