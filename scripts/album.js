@@ -15,6 +15,16 @@ var setSong = function(songNumber) {
     setVolume(currentVolume);
 };
 
+// Function to set the current time of the playing song in the seek bar
+var setCurrentTimeInPlayerBar = function(currentTime) {
+    $('.currently-playing .current-time').text(currentTime);
+};
+
+// Function to set the total time of the playing song in the seek bar
+var setTotalTimeInPlayerBar = function(totalTime) {
+    $('.currently-playing .total-time').text(totalTime);
+};
+
 // Function to be able to seek to specific parts of a song
 var seek = function(time) {
     if(currentSoundFile) {
@@ -29,6 +39,24 @@ var setVolume = function(volume) {
     }
 };
 
+// Function to set inital volume in the seek bar
+var setInitialVolume = function() {
+    var $volumeFill = $('.volume .fill');
+    var $volumeThumb = $('.volume .thumb');
+    $volumeFill.width(currentVolume + '%');
+    $volumeThumb.css({left: currentVolume + '%'});
+};
+
+// Function to stop the song when it reaches end
+var stopSong = function() {
+    currentSoundFile.stop();
+
+    // change pause buttons to play buttons
+    var $songNumberCell = getSongNumberCell(currentlyPlayingSongNumber);
+    $songNumberCell.html(playButtonTemplate);
+    $('.main-controls .play-pause').html(playerBarPlayButton);
+}
+
 // Function to return the song number element for a given song number
 var getSongNumberCell = function(number) {
     return $('.song-item-number[data-song-number="' + number + '"]');
@@ -40,7 +68,7 @@ var createSongRow = function(songNumber, songName, songLength) {
         '<tr class="album-view-song-item">'
     +   '   <td class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</td>'
     +   '   <td class="song-item-title">' + songName + '</td>'
-    +   '   <td class="song-item-duration">' + songLength + '</td>'
+    +   '   <td class="song-item-duration">' + filterTimeCode(songLength) + '</td>'
     +   '</tr>';
 
     var $row = $(template);
@@ -60,10 +88,7 @@ var createSongRow = function(songNumber, songName, songLength) {
             updateSeekBarWhileSongPlays();
 
             // Set initial volume in seek bar
-            var $volumeFill = $('.volume .fill');
-            var $volumeThumb = $('.volume .thumb');
-            $volumeFill.width(currentVolume + '%');
-            $volumeThumb.css({left: currentVolume + '%'});
+            setInitialVolume();
 
             $(this).html(pauseButtonTemplate);
             updatePlayerBarSong();
@@ -131,14 +156,34 @@ var setCurrentAlbum = function(album) {
     }
 };
 
+// Function to convert the seconds of a number to min:sec form
+var filterTimeCode = function(timeInSeconds) {
+    var secondsAsNumber = parseFloat(timeInSeconds);
+    var wholeSeconds = Math.floor(secondsAsNumber);
+    var wholeMinutes = Math.floor(wholeSeconds / 60);
+
+    var remainingSeconds = wholeSeconds - (wholeMinutes * 60);
+
+    if(remainingSeconds < 10) {
+        return wholeMinutes + ":0" + remainingSeconds;
+    } else {
+        return wholeMinutes + ":" + remainingSeconds;
+    }
+};
+
 // Function to update the seek bar when a song plays
 var updateSeekBarWhileSongPlays = function() {
     if(currentSoundFile) {
         currentSoundFile.bind('timeupdate', function(event) {
+            // Check to see if song has reached end; stop if so
+            if(this.getTime() === this.getDuration()) {
+                stopSong();
+            }
             var seekBarFillRatio = this.getTime() / this.getDuration();
             var $seekBar = $('.seek-control .seek-bar');
 
             updateSeekPercentage($seekBar, seekBarFillRatio);
+            setCurrentTimeInPlayerBar(filterTimeCode(this.getTime()));
         });
     }
 };
@@ -158,6 +203,10 @@ var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
 
 // Function to determine the fill width and thumb location
 var setupSeekBars = function() {
+    // Have page load with 50% volume in volume seek bar
+    $('.volume .fill').css('width', '50%');
+    $('.volume .thumb').css('left', '50%')
+
     // Returns an array of seek bars
     var $seekBars = $('.player-bar .seek-bar');
 
@@ -214,6 +263,8 @@ var updatePlayerBarSong = function() {
     $('.currently-playing .artist-song-mobile').text(currentSongFromAlbum.title + " - " + currentAlbum.artist);
     $('.currently-playing .artist-name').text(currentAlbum.artist);
 
+    setTotalTimeInPlayerBar(filterTimeCode(currentSongFromAlbum.duration));
+
     $('.main-controls .play-pause').html(playerBarPauseButton);
 };
 
@@ -234,6 +285,9 @@ var nextSong = function() {
     currentSoundFile.play();
     updateSeekBarWhileSongPlays();
 
+    // Set initial volume in seek bar
+    setInitialVolume();
+
     // Update player bar info
     updatePlayerBarSong();
 
@@ -243,7 +297,10 @@ var nextSong = function() {
 
 var previousSong = function() {
     var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-    currentSongIndex--;
+    // Only change to prev song if current song hasn't played for 5 seconds or longer
+    if(currentSoundFile.getTime() <= 5) {
+        currentSongIndex--;
+    }
 
     if(currentSongIndex < 0) {
         currentSongIndex = currentAlbum.songs.length - 1;
@@ -257,6 +314,9 @@ var previousSong = function() {
     currentSoundFile.play();
     updateSeekBarWhileSongPlays();
 
+    // Set initial volume in seek bar
+    setInitialVolume();
+
     // Update player bar info
     updatePlayerBarSong();
 
@@ -267,8 +327,13 @@ var previousSong = function() {
 // Function to play/pause a song from the player bar
 var togglePlayFromPlayerBar = function() {
     if(!currentSoundFile) {
+        // Set and play first song of album because no song is currently playing
         setSong(1);
         currentSoundFile.play();
+        updateSeekBarWhileSongPlays();
+
+        // Set initial volume in seek bar
+        setInitialVolume();
 
         updatePlayerBarSong();
         getSongNumberCell(currentlyPlayingSongNumber).html(pauseButtonTemplate);
