@@ -20,8 +20,15 @@ body {
 }
 .navbar .logo {
     position: relative;
+    text-decoration: none;
     left: 2rem;
     cursor: pointer; /* produces the finger-pointer icon when you hover over the logo */
+}
+.navbar .nav-title {
+    font-size: 150%;
+    color: rgb(233,50,117);
+    position: absolute;
+    padding: 1rem 0rem 1rem 1rem;
 }
 .navbar .links-container {
     display: table;
